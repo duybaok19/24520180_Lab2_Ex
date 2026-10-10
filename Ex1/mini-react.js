@@ -64,7 +64,7 @@ export function renderToDOM(vNode) {
       dom.appendChild(childDOM);
     });
   }
-
+dom.__vnode = vNode;
   // 4. Trả về DOM node
   return dom;
 }
