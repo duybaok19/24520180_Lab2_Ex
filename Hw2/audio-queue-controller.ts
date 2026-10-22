@@ -3,6 +3,7 @@ import type { AudioTask } from './audio-queue-contract';
 export class AudioTaskQueue {
   private queue: AudioTask[] = [];
   private isProcessing = false;
+  private activeTask: AudioTask | null = null;
 
   constructor(private readonly audioCtx: AudioContext) {}
 
@@ -15,21 +16,37 @@ export class AudioTaskQueue {
         reject,
       };
 
-      // Add the task to the end of the queue (FIFO).
       this.queue.push(task);
-
-      // Start processing the queue.
       void this.processNext();
     });
   }
 
+  cancel(trackUrl: string): void {
+    // Cancel queued tasks matching this URL.
+    const queuedTasks = this.queue.filter(
+      (task) => task.trackUrl === trackUrl,
+    );
+
+    this.queue = this.queue.filter(
+      (task) => task.trackUrl !== trackUrl,
+    );
+
+    for (const task of queuedTasks) {
+      task.controller.abort();
+      task.reject(new Error('Audio loading was cancelled.'));
+    }
+
+    // Cancel the active task if its URL matches.
+    if (this.activeTask?.trackUrl === trackUrl) {
+      this.activeTask.controller.abort();
+    }
+  }
+
   private async processNext(): Promise<void> {
-    // Do not process multiple tasks concurrently.
     if (this.isProcessing || this.queue.length === 0) {
       return;
     }
 
-    // Take the first task from the queue.
     const task = this.queue.shift();
 
     if (!task) {
@@ -37,11 +54,12 @@ export class AudioTaskQueue {
     }
 
     this.isProcessing = true;
+    this.activeTask = task;
 
     try {
       await this.loadTrack(task);
     } finally {
-      // Always reset the flag and continue with the next task.
+      this.activeTask = null;
       this.isProcessing = false;
       void this.processNext();
     }
@@ -72,3 +90,4 @@ export class AudioTaskQueue {
     }
   }
 }
+
