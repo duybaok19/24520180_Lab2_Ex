@@ -1,13 +1,16 @@
-function createAntiDriftTimer(
+export function createAntiDriftTimer(
   durationMs: number,
-  onTick: (remaining: number) => void
+  onTick: (remaining: number) => void,
 ): () => void {
   const targetTime = Date.now() + Math.max(0, durationMs);
+
   let animationId: number | null = null;
   let cancelled = false;
 
   function tick(): void {
-    if (cancelled) return;
+    if (cancelled) {
+      return;
+    }
 
     const remaining = Math.max(0, targetTime - Date.now());
 
@@ -22,7 +25,11 @@ function createAntiDriftTimer(
 
   tick();
 
-  return function cancel(): void {
+  return (): void => {
+    if (cancelled) {
+      return;
+    }
+
     cancelled = true;
 
     if (animationId !== null) {
