@@ -5,19 +5,97 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Flash Sale Purchase</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+
+    label {
+      display: block;
+      margin-top: 14px;
+    }
+
+    input {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 9px;
+      margin-top: 5px;
+    }
+
+    button {
+      margin-top: 16px;
+      padding: 10px 16px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .skeleton-item {
+      height: 20px;
+      margin: 12px 0;
+      border-radius: 4px;
+      background: #e5e7eb;
+      animation: pulse 1s infinite alternate;
+    }
+
+    @keyframes pulse {
+      from { opacity: 0.45; }
+      to { opacity: 1; }
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    #form-status {
+      margin-top: 16px;
+    }
+  </style>
 </head>
 <body>
   <h1>Flash Sale</h1>
+
+  <section aria-label="Product information">
+    <h2>Sale product</h2>
+
+    <div id="product-loading" aria-label="Loading product information">
+      <div class="skeleton-item"></div>
+      <div class="skeleton-item"></div>
+    </div>
+
+    <div id="product-info" hidden>
+      <p>Price: <strong id="product-price"></strong></p>
+      <p>Inventory: <strong id="product-stock"></strong></p>
+    </div>
+
+    <div id="product-error" role="alert" hidden>
+      Could not load product information.
+      <button id="retry-button" type="button">Try again</button>
+    </div>
+
+    <p id="sold-out-message" hidden>
+      This product is sold out and cannot be purchased.
+    </p>
+  </section>
 
   <form id="purchase-form">
     <label for="user-name">Your name:</label>
     <input id="user-name" name="userName" required maxlength="50">
 
-    <button id="purchase-button" type="submit">
+    <label for="user-address">Your address:</label>
+    <input id="user-address" name="userAddress" required maxlength="200">
+
+    <button id="purchase-button" type="submit" disabled>
       Purchase
     </button>
 
-    <p id="form-status" role="status"></p>
+    <p id="form-status" role="status" aria-live="polite"></p>
   </form>
 
   <script src="./purchase-form.js"></script>
