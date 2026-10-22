@@ -1,9 +1,10 @@
-
 import type { AudioTask } from './audio-queue-contract';
 
 export class AudioTaskQueue {
   private queue: AudioTask[] = [];
   private isProcessing = false;
+
+  constructor(private readonly audioCtx: AudioContext) {}
 
   enqueue(trackUrl: string): Promise<AudioBuffer> {
     return new Promise<AudioBuffer>((resolve, reject) => {
@@ -38,10 +39,7 @@ export class AudioTaskQueue {
     this.isProcessing = true;
 
     try {
-      const buffer = await this.loadTrack(task);
-      task.resolve(buffer);
-    } catch (error: unknown) {
-      task.reject(error);
+      await this.loadTrack(task);
     } finally {
       // Always reset the flag and continue with the next task.
       this.isProcessing = false;
@@ -49,8 +47,28 @@ export class AudioTaskQueue {
     }
   }
 
-  private async loadTrack(_task: AudioTask): Promise<AudioBuffer> {
-    // Implemented in HW2-3.
-    throw new Error('not implemented');
+  private async loadTrack(task: AudioTask): Promise<void> {
+    try {
+      const response = await fetch(task.trackUrl, {
+        signal: task.controller.signal,
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to load audio: HTTP ${response.status} ${response.statusText}`,
+        );
+      }
+
+      const arrayBuffer = await response.arrayBuffer();
+      const buffer = await this.audioCtx.decodeAudioData(arrayBuffer);
+
+      task.resolve(buffer);
+    } catch (error: unknown) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        task.reject(new Error('Audio loading was cancelled.'));
+      } else {
+        task.reject(error);
+      }
+    }
   }
 }
