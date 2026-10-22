@@ -1,0 +1,85 @@
+
+/* WCAG 2.2 AA accessibility styles */
+
+:root {
+  color-scheme: light;
+  --text-color: #1f2937;
+  --background-color: #ffffff;
+  --border-color: #6b7280;
+  --header-background: #e5e7eb;
+  --hover-background: #f3f4f6;
+  --focus-color: #005fcc;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 24px;
+  color: var(--text-color);
+  background: var(--background-color);
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.5;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+caption {
+  padding: 12px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-align: left;
+}
+
+th,
+td {
+  border: 1px solid var(--border-color);
+  padding: 12px;
+  text-align: left;
+}
+
+th {
+  background: var(--header-background);
+}
+
+th button {
+  min-width: 24px;
+  min-height: 24px;
+  padding: 8px;
+  border: 0;
+  color: var(--text-color);
+  background: transparent;
+  font: inherit;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+tbody tr:hover {
+  background: var(--hover-background);
+}
+
+/* Visible keyboard focus */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 3px solid var(--focus-color);
+  outline-offset: 3px;
+}
+
+/* Keep the table usable on narrow screens */
+@media (max-width: 600px) {
+  body {
+    margin: 12px;
+  }
+
+  th,
+  td {
+    padding: 8px;
+    overflow-wrap: anywhere;
+  }
+}
